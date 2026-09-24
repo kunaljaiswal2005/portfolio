@@ -1,89 +1,72 @@
 import { assets, infoList, toolsData } from '@/assets/assets'
 import Image from 'next/image'
 import React from 'react'
-import { motion, scale } from "motion/react"
 
-const About = ({isDarkMode}) => {
+const TOOL_NAMES = ['VS Code', 'Firebase', 'MongoDB', 'Figma', 'Git']
+
+const About = ({ isDarkMode }) => {
   return (
-    <motion.div
-    initial = {{opacity:0}}
-    whileInView = {{opacity:1}}
-    transition={{duration:1}} 
-    id='about' className='w-full px-[12%] py-10 scroll-mt-20'>
-        <motion.h4
-        initial = {{y:-20,opacity:0}}
-         whileInView = {{opacity:1,y:0}}
-         transition={{duration:0.5,delay:0.3}} 
-        className='text-center mb-2 text-lg font-Ovo'>
-            Introduction
-        </motion.h4>
-        <motion.h2
-        initial = {{y:-20,opacity:0}}
-         whileInView = {{opacity:1,y:0}}
-         transition={{duration:0.5,delay:0.5}}  
-        className='text-center text-5xl font-Ovo'>
-            About me
-        </motion.h2>
-        <motion.div 
-        initial = {{opacity:0}}
-        whileInView = {{opacity:1}}
-        transition={{duration:1}} 
-        className='w-full flex flex-col lg:flex-row items-center gap-20 my-20 '>
-            <motion.div 
-            initial = {{opacity:0,scale:0.9}}
-            whileInView = {{opacity:1,scale:1}}
-            transition={{duration:0.5,delay: 0.3}} 
-            className='w-64 sm:w-80 rounded-3xl max-w-none ' >
-                <Image src={assets.user_image} alt='user' className='w-full rounded-3xl'/>
-            </motion.div>
-            <motion.div 
-            initial = {{opacity:0}}
-            whileInView = {{opacity:1}}
-            transition={{duration:0.6,delay:0.8}} 
-            className="flex-1">
-                <p className='mb-10 max-w-2xl font-Ovo'>I’m a Computer Science (AI) student and an aspiring Full Stack Developer passionate about creating responsive and scalable web applications. I enjoy working with React, Node.js, Express, MongoDB, and modern web technologies while continuously learning and building projects that solve real-world problems.</p>
-                <motion.ul 
-                initial = {{opacity:0}}
-                whileInView = {{opacity:1}}
-                transition={{duration:0.8,delay:1}} 
-                className='grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl'>
-                    {infoList.map(({icon,iconDark,title,description},index)=>{
-                        return (
-                            <motion.li 
-                            whileHover = {{scale:1.05}}
-                            className='border-[0.5px] border-gray-400 rounded-xl p-6 cursor-pointer hover:bg-lightHover hover:-translate-y-1 duration-500 hover:shadow-black dark:border-white dark:hover:shadow-white dark:hover:bg-darkHover/50 '
-                         key={index}>
-                            <Image src={isDarkMode?iconDark:icon} alt={title} className='w-7 mt-3'/>
-                            <h3 className='m-4 font-semibold text-gray-700 dark:text-white'>{title}</h3>
-                            <p className=' text-gray-600 text-sm dark:text-white/80'> {description} </p>
-                        </motion.li>  
-                        )
-                    })}
-                </motion.ul>
-                <motion.h4 
-                initial = {{y:20,opacity:0}}
-                  whileInView = {{y:0,opacity:1}}
-                   transition={{duration:0.5,delay:1.3}} 
-                className='my-6 font-Ovo text-gray-700 dark:text-white/80'>
-                    Tools I use
-                </motion.h4>
-                <motion.ul 
-                initial = {{opacity:0}}
-                whileInView = {{opacity:1}}
-                transition={{duration:1.5,delay:0.6}}
-                className='flex items-center gap-3 sm:gap-5'>
-                    {toolsData.map((tool,index)=>(
-                        <motion.li 
-                        whileHover={{scale:1.05}}
-                        key={index} className="flex items-center justify-center w-12 sm:w-14 aspect-square border border-gray-400 rounded-lg cursor-pointer hover:-translate-y-1 duration-500">
-                            <Image src={tool} alt='' className='w-5 sm:w-7'/>
-                        </motion.li>
-                    ))}
-                </motion.ul>
+    <div id='about' className='w-full px-[12%] py-16 scroll-mt-20'>
+      <p className='text-center text-sm uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 font-Outfit'>Introduction</p>
+      <h2 className='text-center text-5xl font-Ovo mb-16'>About Me</h2>
 
-            </motion.div>
-        </motion.div>
-    </motion.div>
+      <div className='w-full flex flex-col lg:flex-row items-start gap-16'>
+        {/* Photo */}
+        <div className='w-64 sm:w-72 mx-auto lg:mx-0 flex-shrink-0'>
+          <div className='relative'>
+            <Image src={assets.user_image} alt='Kunal' className='w-full rounded-2xl shadow-xl' />
+            {/* Floating badge */}
+            <div className='absolute -bottom-4 -right-4 bg-white dark:bg-darkHover rounded-xl px-4 py-2 shadow-lg border border-gray-100 dark:border-white/10'>
+              <p className='text-xs text-gray-500 dark:text-white/50'>Available for</p>
+              <p className='text-sm font-semibold text-green-500'>Freelance / Jobs</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className='flex-1'>
+          <p className='mb-8 max-w-2xl font-Ovo text-gray-600 dark:text-white/70 leading-relaxed'>
+            I'm a Computer Science (AI) student and aspiring Full Stack Developer passionate about
+            creating responsive and scalable web applications. I enjoy working with React, Node.js,
+            Express, MongoDB, and modern web technologies while continuously learning and building
+            projects that solve real-world problems.
+          </p>
+
+          {/* Info cards */}
+          <ul className='grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mb-10'>
+            {infoList.map(({ icon, iconDark, title, description }, i) => (
+              <li
+                key={i}
+                className='border border-gray-200 dark:border-white/10 rounded-xl p-5 hover:border-black dark:hover:border-white hover:-translate-y-1 transition-all duration-300 bg-white/40 dark:bg-white/5'
+              >
+                <Image src={isDarkMode ? iconDark : icon} alt={title} className='w-7 mb-3' />
+                <h3 className='font-semibold text-gray-800 dark:text-white mb-1'>{title}</h3>
+                <p className='text-gray-500 dark:text-white/60 text-sm leading-snug'>{description}</p>
+              </li>
+            ))}
+          </ul>
+
+          {/* Tools */}
+          <h4 className='font-Ovo text-gray-700 dark:text-white/80 mb-4'>Tools I use</h4>
+          <ul className='flex items-center gap-3 flex-wrap'>
+            {toolsData.map((tool, i) => (
+              <li
+                key={i}
+                title={TOOL_NAMES[i]}
+                className='flex flex-col items-center gap-1.5 group'
+              >
+                <div className='w-12 h-12 flex items-center justify-center border border-gray-200 dark:border-white/20 rounded-xl hover:border-black dark:hover:border-white hover:-translate-y-1 transition-all duration-300 bg-white/60 dark:bg-white/5'>
+                  <Image src={tool} alt={TOOL_NAMES[i] || ''} className='w-6' />
+                </div>
+                <span className='text-[10px] text-gray-400 dark:text-white/40 group-hover:text-gray-700 dark:group-hover:text-white/70 transition-colors'>
+                  {TOOL_NAMES[i]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
   )
 }
 
