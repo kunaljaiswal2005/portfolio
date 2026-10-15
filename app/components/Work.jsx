@@ -8,6 +8,21 @@ import React, { useState, useMemo } from 'react'
 //  Add an object to workData — see the template comment there
 // ═══════════════════════════════════════════════════════════════
 
+const INITIAL_SHOW = 4
+
+const TYPE_COLORS = {
+  'Full Stack': 'bg-black text-white',
+  'Frontend':   'bg-black text-white',
+  'Backend':    'bg-black text-white',
+}
+
+const STATUS_COLORS = {
+  'Completed':   'bg-green-100 text-green-700',
+  'In Progress': 'bg-amber-100 text-amber-700',
+  'Ongoing':     'bg-amber-100 text-amber-700',
+  'Open Source': 'bg-blue-100 text-blue-700',
+}
+
 const EXT_SVG = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
     <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
@@ -22,248 +37,205 @@ const GITHUB_SVG = (
   </svg>
 )
 
-const STATUS_COLORS = {
-  'Completed':   'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  'In Progress': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  'Open Source': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-}
-
-const ITEMS_PER_PAGE = 6
-
 const Work = ({ isDarkMode }) => {
   const categories = useMemo(
     () => ['All', ...Array.from(new Set(workData.map(p => p.type).filter(Boolean)))],
     []
   )
 
-  const [active, setActive] = useState('All')
-  const [search, setSearch] = useState('')
-  const [page,   setPage]   = useState(1)
-  const [sortBy, setSortBy] = useState('default')
+  const [active,  setActive]  = useState('All')
+  const [visible, setVisible] = useState(INITIAL_SHOW)
 
   const filtered = useMemo(() => {
-    let list = active === 'All' ? workData : workData.filter(p => p.type === active)
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      list = list.filter(p =>
-        p.title.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q) ||
-        p.tags?.some(t => t.toLowerCase().includes(q))
-      )
-    }
-    if (sortBy === 'az') list = [...list].sort((a, b) => a.title.localeCompare(b.title))
-    if (sortBy === 'za') list = [...list].sort((a, b) => b.title.localeCompare(a.title))
-    return list
-  }, [active, search, sortBy])
+    return active === 'All' ? workData : workData.filter(p => p.type === active)
+  }, [active])
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
-  const paged      = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)
+  const shown    = filtered.slice(0, visible)
+  const remaining = filtered.length - visible
 
-  const handleFilter = cat => { setActive(cat); setPage(1) }
-  const handleSearch = e   => { setSearch(e.target.value); setPage(1) }
+  const handleFilter = cat => {
+    setActive(cat)
+    setVisible(INITIAL_SHOW)
+  }
 
   return (
-    <div id="work" className="w-full px-[12%] py-16 scroll-mt-20">
-      {/* Heading */}
-      <p className="text-center text-sm uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 font-Outfit">My portfolio</p>
-      <h2 className="text-center text-5xl font-Ovo mb-4">My Latest Work</h2>
-      <p className="text-center max-w-2xl mx-auto mb-10 font-Ovo text-gray-500 dark:text-white/60">
-        A collection of projects showcasing my expertise in frontend &amp; full-stack development.
-      </p>
+    <div id="work" className="w-full px-[8%] py-20 scroll-mt-20">
 
-      {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-        {/* Filter tabs */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map(cat => (
+      {/* ── Section number + heading */}
+      <div className="mb-12">
+        <p className={`text-sm font-mono mb-2 ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>01</p>
+        <h2 className={`text-4xl font-bold tracking-tight uppercase mb-0 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          Featured Works
+        </h2>
+        <div className={`mt-3 h-px w-full ${isDarkMode ? 'bg-white/10' : 'bg-gray-200'}`} />
+      </div>
+
+      {/* ── Filter tabs */}
+      <div className="flex flex-wrap gap-3 mb-12">
+        {categories.map(cat => {
+          const count = cat === 'All' ? workData.length : workData.filter(p => p.type === cat).length
+          return (
             <button
               key={cat}
               onClick={() => handleFilter(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all duration-200
+              className={`px-4 py-1.5 text-sm font-medium border transition-all duration-200
                 ${active === cat
-                  ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white'
-                  : 'border-gray-300 text-gray-500 hover:border-black hover:text-black dark:border-white/20 dark:text-white/60 dark:hover:border-white dark:hover:text-white'}`}
+                  ? isDarkMode
+                    ? 'bg-white text-black border-white'
+                    : 'bg-black text-white border-black'
+                  : isDarkMode
+                    ? 'border-white/20 text-white/50 hover:border-white/60 hover:text-white/80'
+                    : 'border-gray-300 text-gray-500 hover:border-gray-500 hover:text-gray-700'
+                }`}
             >
-              {cat}
-              <span className="ml-1.5 text-[10px] opacity-60">
-                ({cat === 'All' ? workData.length : workData.filter(p => p.type === cat).length})
-              </span>
+              {cat} ({count})
             </button>
-          ))}
-        </div>
-
-        {/* Search + Sort */}
-        <div className="flex items-center gap-3">
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-full border text-sm
-            ${isDarkMode ? 'border-white/20 bg-white/5 text-white' : 'border-gray-200 bg-white text-gray-700'}`}>
-            <svg className="w-4 h-4 opacity-40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-            </svg>
-            <input
-              value={search}
-              onChange={handleSearch}
-              placeholder="Search projects…"
-              className="bg-transparent outline-none w-36 placeholder-gray-400 dark:placeholder-white/30"
-            />
-            {search && (
-              <button onClick={() => { setSearch(''); setPage(1) }} className="opacity-40 hover:opacity-100 transition">✕</button>
-            )}
-          </div>
-
-          <select
-            value={sortBy}
-            onChange={e => { setSortBy(e.target.value); setPage(1) }}
-            className={`text-sm px-3 py-2 rounded-full border outline-none cursor-pointer
-              ${isDarkMode ? 'border-white/20 bg-white/5 text-white' : 'border-gray-200 bg-white text-gray-700'}`}
-          >
-            <option value="default">Default</option>
-            <option value="az">A → Z</option>
-            <option value="za">Z → A</option>
-          </select>
-        </div>
+          )
+        })}
       </div>
 
-      {/* Result count */}
-      {search && (
-        <p className="text-sm text-gray-400 dark:text-white/40 mb-5">
-          {filtered.length} result{filtered.length !== 1 ? 's' : ''} for "{search}"
-        </p>
-      )}
-
-      {/* Grid */}
-      {paged.length === 0 ? (
-        <div className="text-center py-24 text-gray-400 dark:text-white/30">
-          <p className="text-4xl mb-3">🔍</p>
-          <p className="font-Ovo text-lg">No projects match your search.</p>
-          <button
-            onClick={() => { setSearch(''); setActive('All') }}
-            className="mt-4 text-sm underline hover:opacity-70"
+      {/* ── Project list */}
+      <div className="flex flex-col gap-0">
+        {shown.map((project, i) => (
+          <div
+            key={project.slug || i}
+            className={`flex flex-col lg:flex-row gap-8 lg:gap-16 py-14 border-b
+              ${isDarkMode ? 'border-white/10' : 'border-gray-200'}
+              ${i === 0 ? `border-t ${isDarkMode ? 'border-white/10' : 'border-gray-200'}` : ''}`}
           >
-            Clear filters
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
-          {paged.map((project, i) => (
-            <div
-              key={project.slug || i}
-              className={`group flex flex-col rounded-2xl overflow-hidden border hover:-translate-y-1 transition-all duration-300
-                ${isDarkMode
-                  ? 'bg-[#1a0030] border-white/10 hover:border-white/30'
-                  : 'bg-white border-gray-100 hover:border-gray-300 shadow-sm hover:shadow-md'}`}
-            >
-              {/* Thumbnail — clicking goes to detail page */}
-              <Link href={`/projects/${project.slug}`} className="block">
-                <div
-                  className="relative w-full h-48 bg-cover bg-center bg-no-repeat overflow-hidden"
-                  style={{ backgroundImage: `url(${project.bgImage})` }}
-                >
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <span className="text-white text-sm font-medium border border-white/60 px-4 py-1.5 rounded-full backdrop-blur-sm">
-                      View Case Study →
-                    </span>
-                  </div>
+            {/* ── Left: text */}
+            <div className="flex-1 flex flex-col justify-between">
+              {/* Badges */}
+              <div className="flex flex-wrap items-center gap-2 mb-5">
+                {project.type && (
+                  <span className={`text-xs font-bold px-3 py-1 uppercase tracking-wider ${TYPE_COLORS[project.type] || 'bg-black text-white'}`}>
+                    {project.type}
+                  </span>
+                )}
+                {project.status && (
+                  <span className={`text-xs font-semibold px-3 py-1 ${STATUS_COLORS[project.status] || 'bg-gray-100 text-gray-600'}`}>
+                    {project.status}
+                  </span>
+                )}
+              </div>
 
-                  {/* Badges */}
-                  <div className="absolute top-3 left-3 flex gap-2">
-                    {project.type && (
-                      <span className="bg-black/60 text-white text-[11px] px-2.5 py-0.5 rounded-full backdrop-blur-sm">
-                        {project.type}
-                      </span>
-                    )}
-                    {project.status && (
-                      <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium backdrop-blur-sm ${STATUS_COLORS[project.status] || ''}`}>
-                        {project.status}
-                      </span>
-                    )}
-                  </div>
-                </div>
+              {/* Title */}
+              <Link href={project.slug ? `/projects/${project.slug}` : '#'}>
+                <h3 className={`text-2xl font-bold mb-4 leading-snug hover:opacity-70 transition-opacity
+                  ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {project.title}
+                </h3>
               </Link>
 
-              {/* Body */}
-              <div className="flex flex-col flex-1 p-5">
-                <Link href={`/projects/${project.slug}`} className="hover:underline">
-                  <h3 className="font-semibold text-base mb-1 dark:text-white">{project.title}</h3>
-                </Link>
-                <p className="text-sm text-gray-500 dark:text-white/50 mb-4 flex-1 line-clamp-2">{project.description}</p>
+              {/* Description */}
+              <p className={`text-sm leading-relaxed mb-6 ${isDarkMode ? 'text-white/55' : 'text-gray-500'}`}>
+                {project.description}
+              </p>
 
-                {/* Tags */}
-                {project.tags?.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {project.tags.slice(0, 4).map(tag => (
-                      <span key={tag} className={`text-[11px] px-2.5 py-0.5 rounded-full font-medium
-                        ${isDarkMode ? 'bg-white/10 text-white/70' : 'bg-gray-100 text-gray-500'}`}>
-                        {tag}
-                      </span>
-                    ))}
-                    {project.tags.length > 4 && (
-                      <span className="text-[11px] text-gray-400 dark:text-white/30">+{project.tags.length - 4}</span>
-                    )}
-                  </div>
-                )}
-
-                {/* Footer row */}
-                <div className="flex items-center gap-3 mt-auto pt-3 border-t border-gray-100 dark:border-white/10">
-                  {project.liveUrl ? (
-                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs font-medium text-purple-600 dark:text-purple-400 hover:underline">
-                      {EXT_SVG} Live
-                    </a>
-                  ) : (
-                    <span className="text-xs text-gray-300 dark:text-white/20">No live link</span>
-                  )}
-
-                  {project.githubUrl && (
-                    <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-white/50 hover:text-black dark:hover:text-white transition">
-                      {GITHUB_SVG} Code
-                    </a>
-                  )}
-
-                  {/* Detail page link */}
-                  {project.slug && (
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      className="ml-auto text-xs font-medium text-gray-400 dark:text-white/30 hover:text-black dark:hover:text-white transition"
-                    >
-                      Case Study →
-                    </Link>
-                  )}
+              {/* Highlight quote block */}
+              {project.highlight && (
+                <div className={`border-l-4 border-blue-500 pl-4 mb-6`}>
+                  <p className={`text-sm font-mono leading-relaxed ${isDarkMode ? 'text-white/60' : 'text-gray-500'}`}>
+                    {project.highlight}
+                  </p>
                 </div>
+              )}
+
+              {/* Tags */}
+              {project.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {project.tags.map(tag => (
+                    <span
+                      key={tag}
+                      className={`text-xs px-3 py-1 font-medium uppercase tracking-wide
+                        ${isDarkMode ? 'bg-white/10 text-white/60' : 'bg-gray-100 text-gray-500'}`}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* CTA buttons */}
+              <div className="flex flex-wrap items-center gap-3">
+                {project.slug && (
+                  <Link
+                    href={`/projects/${project.slug}`}
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest transition-all
+                      ${isDarkMode
+                        ? 'bg-white text-black hover:bg-white/90'
+                        : 'bg-black text-white hover:bg-gray-800'}`}
+                  >
+                    Case Study
+                  </Link>
+                )}
+                {project.liveUrl && (
+                  <a
+                    href={project.liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest border transition-all
+                      ${isDarkMode
+                        ? 'border-white/30 text-white hover:border-white'
+                        : 'border-gray-300 text-gray-600 hover:border-gray-600'}`}
+                  >
+                    {EXT_SVG} Live Demo
+                  </a>
+                )}
+                {project.githubUrl && (
+                  <a
+                    href={project.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center gap-2 text-xs font-medium transition-opacity opacity-60 hover:opacity-100
+                      ${isDarkMode ? 'text-white' : 'text-gray-600'}`}
+                  >
+                    {GITHUB_SVG} GitHub
+                  </a>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-12">
+            {/* ── Right: screenshot */}
+            {project.bgImage && (
+              <div className="lg:w-[48%] flex-shrink-0">
+                <Link href={project.slug ? `/projects/${project.slug}` : '#'}>
+                  <div
+                    className={`relative w-full aspect-video overflow-hidden border group
+                      ${isDarkMode ? 'border-white/10' : 'border-gray-200'}`}
+                  >
+                    <div
+                      className="absolute inset-0 bg-cover bg-top bg-no-repeat transition-transform duration-500 group-hover:scale-105"
+                      style={{ backgroundImage: `url(${project.bgImage})` }}
+                    />
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity border border-white px-4 py-2">
+                        View Case Study →
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Load More button */}
+      {remaining > 0 && (
+        <div className="flex justify-center mt-12">
           <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 rounded-full border border-gray-300 dark:border-white/20 text-sm disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition"
+            onClick={() => setVisible(v => v + INITIAL_SHOW)}
+            className={`flex items-center gap-3 px-10 py-4 text-sm font-bold uppercase tracking-widest border transition-all duration-200
+              ${isDarkMode
+                ? 'border-white/30 text-white hover:bg-white hover:text-black'
+                : 'border-gray-400 text-gray-700 hover:bg-black hover:text-white hover:border-black'}`}
           >
-            ← Prev
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-            <button
-              key={n}
-              onClick={() => setPage(n)}
-              className={`w-9 h-9 rounded-full text-sm transition
-                ${n === page
-                  ? 'bg-black text-white dark:bg-white dark:text-black'
-                  : 'border border-gray-300 dark:border-white/20 hover:bg-gray-50 dark:hover:bg-white/10'}`}
-            >
-              {n}
-            </button>
-          ))}
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 rounded-full border border-gray-300 dark:border-white/20 text-sm disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-white/10 transition"
-          >
-            Next →
+            Load More ({remaining} remaining)
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </button>
         </div>
       )}

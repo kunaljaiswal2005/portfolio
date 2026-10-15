@@ -127,6 +127,7 @@ export const workData = [
     duration: "2 months",
     status: "Completed",
     screenshots: ["/bytevibe1.png"],
+    highlight: "A full-stack blogging platform featuring secure authentication, rich-text publishing, and community engagement"
   },
   {
     slug: "travel-buddy",
@@ -160,6 +161,7 @@ export const workData = [
     duration: "6 weeks",
     status: "Completed",
     screenshots: ["/travel1.png","/travel2.png"],
+    highlight: "Developed a responsive travel planning app featuring destination search, interactive itinerary building, and real-time weather integration."
   },
   {
     slug: "mern-authentication-system",
@@ -195,6 +197,7 @@ export const workData = [
     duration: "3 weeks",
     status: "Completed",
     screenshots: ["/auth2.png"],
+    highlight: "Implemented a reusable authentication system with JWT refresh token rotation, email verification, OTP-based password recovery, and role-based access control."
   },
   
   {
@@ -230,6 +233,7 @@ export const workData = [
     duration: "5 weeks",
     status: "Completed",
     screenshots: [],
+    highlight: "Built an AI-powered mock interview platform using Gemini AI to generate questions, evaluate answers, and deliver personalized performance feedback."
   },
   {
     slug: "tripnest",
@@ -283,6 +287,7 @@ export const workData = [
     duration: "2-3 months",
     status: "Ongoing",
     screenshots: [""],
+    highlight: "Developed a full-stack travel management platform with Spring Boot, PostgreSQL, JWT authentication, Google OAuth2, and collaborative trip planning."
   },
   {
   slug: "shakti-dental-clinic",
@@ -347,7 +352,8 @@ export const workData = [
 
   screenshots: [
     "/clinic2.png","/clinic3.png","/clinic4.png"
-  ]
+  ],
+  highlight: "Designed and deployed a responsive dental clinic website featuring service showcases, doctor information, patient testimonials, and appointment details."
 }
   
   
